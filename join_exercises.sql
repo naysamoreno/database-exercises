@@ -1,38 +1,42 @@
 USE employees;
 
-SELECT employees.last_name, salaries.salary
-FROM employees JOIN salaries
-                    on employees.emp_no = salaries.emp_no
-    LIMIT 50;
+# Using the example in the Associative Table Joins section as a guide, write a query that shows each
+# department along with the name of the current manager for that department.
+SELECT d.dept_name AS 'Department Name', CONCAT(e.first_name, ' ', e.last_name) AS 'Department Manager'
+FROM employees e
+         JOIN dept_manager dm
+              ON e.emp_no = dm.emp_no
+         JOIN departments d
+              ON dm.dept_no = d.dept_no
+WHERE dm.to_date LIKE '9%'
+ORDER BY dept_name;
 
-USE codeup_test_db;
+# Find the name of all departments currently managed by women.
+SELECT d.dept_name AS 'Department Name', CONCAT(e.first_name, ' ', e.last_name) AS 'Department Manager'
+FROM employees e
+         JOIN dept_manager dm
+              ON e.emp_no = dm.emp_no
+         JOIN departments d
+              ON dm.dept_no = d.dept_no
+WHERE dm.to_date LIKE '9%' AND e.gender = 'F'
+ORDER BY dept_name;
 
-CREATE TABLE persons (
-                         person_id INT NOT NULL AUTO_INCREMENT,
-                         first_name VARCHAR(25) NOT NULL,
-                         album_id INT NOT NULL,
-                         PRIMARY KEY (person_id)
-);
+# Find the current titles of employees currently working in the Customer Service department.
+SELECT t.title, COUNT(t.title) AS Total
+FROM titles as t
+         JOIN dept_emp as de
+              ON de.emp_no = t.emp_no
+WHERE de.dept_no = 'd009' AND YEAR(t.to_date) = '9999' AND YEAR(de.to_date) = '9999'
+GROUP BY t.title;
 
-INSERT INTO persons(first_name, album_id) VALUES ('Olivia', 29), ('Austin', 23), ('Tareq', 15), ('Anaya', 10);
-
-#Joining tables together
-SELECT p.first_name, a.name FROM persons p JOIN albums a on p.album_id = a.id;
-#Switch the rows from right to left now
-SELECT p.first_name, a.name FROM albums a LEFT JOIN persons p on a.id = p.album_id;
--- this one shows more data. instead of only showing people that have favorited an album
--- we see every album and if that album has a person associated with it they will be displayed
-
-SELECT p.first_name, a.name FROM persons p RIGHT JOIN albums a on a.id = p.album_id;
-
-CREATE TABLE preferences (
-                             person_id INT NOT NULL,
-                             album_id INT NOT NULL
-);
-
-INSERT INTO preferences (person_id, album_id) VALUES (1, 12), (1, 5), (1, 22), (1, 29), (2, 1), (2, 31), (2, 30), (3, 11), (3, 26), (3, 25);
-
-SELECT p.first_name AS NAME, a.name AS album
-FROM persons p
-         JOIN preferences pf ON p.person_id = pf.person_id
-         JOIN albums a ON pf.album_id = a.id;
+# Find the current salary of all current managers.
+SELECT d.dept_name AS 'Department Name', CONCAT(e.first_name, ' ', e.last_name) AS 'Department Manager',
+       s.salary AS Salary
+FROM employees e
+         JOIN dept_manager dm
+              ON e.emp_no = dm.emp_no
+         JOIN departments d
+              ON dm.dept_no = d.dept_no
+         JOIN salaries s on e.emp_no = s.emp_no
+WHERE dm.to_date LIKE '9%' AND s.to_date LIKE '9%'
+ORDER BY dept_name;
